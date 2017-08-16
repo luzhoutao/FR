@@ -6,7 +6,7 @@ import numpy as np
 from PCA import pca
 
 # settings
-data_root = "./data"
+data_root = "./lfw"
 
 # read labeled image
 image_mat = []
@@ -26,4 +26,9 @@ for file in os.listdir(data_root):
 image_mat = np.array(image_mat, dtype=np.float32).T
 labels = np.array(labels)
 
-pca(image_mat)
+[W_norm, v, mean] = pca(image_mat)
+print("saving...")
+np.save('pca/Wnorm', W_norm)
+np.save('pca/eigenvalue', v)
+np.save('pca/mean', mean)
+print('done!')
