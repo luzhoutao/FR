@@ -1,14 +1,16 @@
 import os
 # image operation
-import cv2
+from PIL import Image
 import numpy as np
 # utils
 from PCA import pca
+# detection and alignment
+import detection
 
 # settings
-data_root = "./lfw"
+data_root = "./data"
+detector = detection.Detector()
 
-# read labeled image
 image_mat = []
 labels = []
 for file in os.listdir(data_root):
@@ -17,15 +19,21 @@ for file in os.listdir(data_root):
         continue
 
     for imagefile in os.listdir(os.path.join(data_root, file)):
-        image = cv2.imread(os.path.join(data_root, file, imagefile), 0) # grayscale
-        image = np.reshape(image, -1) # reshape to a row-vector
+        # read image
+        image = Image.open(os.path.join(data_root, file, imagefile)).convert(mode='L')
 
-        image_mat.append(image)
+        # detect face and landmark (must have one)
+        face = np.array(detector.detect(image)[0])
+
+        face_vector = np.reshape(face, -1) # reshape to a row-vector
+
+        image_mat.append(face_vector)
         labels.append(file)
-
+# get the traning matrix
 image_mat = np.array(image_mat, dtype=np.float32).T
 labels = np.array(labels)
 
+# run pca and save PC
 [W_norm, v, mean] = pca(image_mat)
 print("saving...")
 np.save('pca/Wnorm', W_norm)
