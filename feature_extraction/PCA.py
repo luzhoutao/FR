@@ -43,6 +43,8 @@ def pca(A):
 
     return W_norm, eigen_value, mean
 
+
+'''
 x = np.array([
     [1,2,3,4,5],
     [2,3,4,1,5],
@@ -51,3 +53,4 @@ x = np.array([
     [3,2,1,4,5]
 ])
 print(pca(x))
+'''

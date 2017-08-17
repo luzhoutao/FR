@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 # image operation
 from PIL import Image
 import numpy as np
@@ -50,7 +51,11 @@ print("Collect %d faces!" % (len(labels)))
 
 # run pca and save PC
 print("Start PCA ...")
+
+start_time = time.time()
 [W_norm, v, mean] = pca(image_mat)
+print('Finish in %s seconds!'%(time.time() - start_time))
+
 print("saving...")
 np.save('pca/Wnorm', W_norm)
 np.save('pca/eigenvalue', v)
@@ -58,7 +63,11 @@ np.save('pca/mean', mean)
 print('done!')
 
 print("Start LDA ...")
+
+start_time = time.time()
 [W, center, classes] = lda(image_mat, labels)
+print('Finish in %s seconds!'%(time.time() - start_time))
+
 print('saving...')
 np.save('lda/W', W)
 np.save('lda/center', center)
