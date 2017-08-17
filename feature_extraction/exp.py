@@ -1,9 +1,11 @@
 import os
+import sys
 # image operation
 from PIL import Image
 import numpy as np
 # utils
 from PCA import pca
+from LDA import lda
 # detection and alignment
 import detection
 
@@ -11,6 +13,7 @@ import detection
 data_root = "./data"
 detector = detection.Detector()
 
+count = 0
 image_mat = []
 labels = []
 for file in os.listdir(data_root):
@@ -23,20 +26,41 @@ for file in os.listdir(data_root):
         image = Image.open(os.path.join(data_root, file, imagefile)).convert(mode='L')
 
         # detect face and landmark (must have one)
-        face = np.array(detector.detect(image)[0])
+        faces = detector.detect(image)
+
+        if len(faces) == 0:
+            print('.', end='')
+            count += 1
+            sys.stdout.flush()
+            continue
+
+        face = np.array(faces[0].convert(mode='L'))
 
         face_vector = np.reshape(face, -1) # reshape to a row-vector
 
         image_mat.append(face_vector)
         labels.append(file)
+
+print('\nFind %d mis-detected faces!' % (count))
+
 # get the traning matrix
 image_mat = np.array(image_mat, dtype=np.float32).T
 labels = np.array(labels)
+print("Collect %d faces!" % (len(labels)))
 
 # run pca and save PC
+print("Start PCA ...")
 [W_norm, v, mean] = pca(image_mat)
 print("saving...")
 np.save('pca/Wnorm', W_norm)
 np.save('pca/eigenvalue', v)
 np.save('pca/mean', mean)
+print('done!')
+
+print("Start LDA ...")
+[W, center, classes] = lda(image_mat, labels)
+print('saving...')
+np.save('lda/W', W)
+np.save('lda/center', center)
+np.save('lda/classes', classes)
 print('done!')

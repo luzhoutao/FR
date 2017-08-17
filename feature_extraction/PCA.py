@@ -29,4 +29,25 @@ def pca(A):
     W = np.dot(A_norm, eigen_vector) # d x n
     W_norm = W / linalg.norm(W, axis=0) # normalization
 
+    # choose 90% eigen vector
+    pdf = eigen_value / np.sum(eigen_value)
+    temp, k = 0.0, 0
+    for k, v in enumerate(pdf):
+        temp += v
+        if temp > 0.9:
+            break
+
+    print('Choose %d eigen vectors. '% (k))
+    eigen_value = eigen_value[:k]
+    W_norm = W_norm[:, :k]
+
     return W_norm, eigen_value, mean
+
+x = np.array([
+    [1,2,3,4,5],
+    [2,3,4,1,5],
+    [1,4,2,3,5],
+    [3,5,1,2,4],
+    [3,2,1,4,5]
+])
+print(pca(x))
