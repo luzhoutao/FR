@@ -13,6 +13,23 @@ import detection
 # settings
 data_root = "./data"
 detector = detection.Detector()
+pca_w_path = "./Wnorm.npy"
+result_root = "./result/w"
+
+
+'''
+This file is used to extract LDA feature of faces.
+Data source: http://vintage.winklerbros.net/facescrub.html
+First, apply the PCA reduction to the raw data; then use it as the input data of LDA
+
+faces: 258 people, 37813 faces
+training time: ______ seconds (on Ubuntu 14.04, Intel core i7 3.40GHz * 8)
+
+Input face size: 150 * 170
+90% eigenvector: ___
+'''
+
+pca_w = np.load(pca_w_path)
 
 count = 0
 image_mat = []
@@ -38,8 +55,9 @@ for file in os.listdir(data_root):
         face = np.array(faces[0].convert(mode='L'))
 
         face_vector = np.reshape(face, -1) # reshape to a row-vector
+        reduced_face_vector = np.dot(face_vector, pca_w)
 
-        image_mat.append(face_vector)
+        image_mat.append(reduced_face_vector)
         labels.append(file)
 
 print('\nFind %d mis-detected faces!' % (count))
@@ -49,18 +67,6 @@ image_mat = np.array(image_mat, dtype=np.float32).T
 labels = np.array(labels)
 print("Collect %d faces!" % (len(labels)))
 
-# run pca and save PC
-print("Start PCA ...")
-
-start_time = time.time()
-[W_norm, v, mean] = pca(image_mat)
-print('Finish in %s seconds!'%(time.time() - start_time))
-
-print("saving...")
-np.save('pca/Wnorm', W_norm)
-np.save('pca/eigenvalue', v)
-np.save('pca/mean', mean)
-print('done!')
 
 print("Start LDA ...")
 
@@ -69,7 +75,7 @@ start_time = time.time()
 print('Finish in %s seconds!'%(time.time() - start_time))
 
 print('saving...')
-np.save('lda/W', W)
-np.save('lda/center', center)
-np.save('lda/classes', classes)
+np.save(os.path.join(result_root, 'W'), W)
+np.save(os.path.join(result_root, 'center'), center)
+np.save(os.path.join(result_root, 'classes'), classes)
 print('done!')

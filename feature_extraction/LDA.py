@@ -21,8 +21,8 @@ def lda(A, labels):
         sw += np.cov(partition[idx], rowvar=True) * (class_counts[idx]-1) # freedom degree
     print('sw', sw)
 
-    # compute between-class scatter matrix
-    # [WRING] sb = np.cov(class_mean, rowvar=True)
+    # compute between-class scatter matrix (use mean of all data)
+    # [WRONG] sb = np.cov(class_mean, rowvar=True) (not mean of class means)
     sb = np.zeros([n, n])
     for idx in range(len(classes)):
         dif = class_mean[:, idx] - mu
