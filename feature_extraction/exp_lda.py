@@ -11,10 +11,14 @@ from LDA import lda
 import detection
 
 # settings
-data_root = "./data"
+data_root = "./data/old_download"
 detector = detection.Detector()
-pca_w_path = "./Wnorm.npy"
-result_root = "./result/w"
+pca_w_path = "./pca/Wnorm.npy"
+result_root = "./results/lda"
+
+# truncated image bug
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 '''
@@ -40,6 +44,9 @@ for file in os.listdir(data_root):
         continue
 
     for imagefile in os.listdir(os.path.join(data_root, file)):
+        if 'jpg' not in imagefile:
+            continue
+
         # read image
         image = Image.open(os.path.join(data_root, file, imagefile)).convert(mode='L')
 

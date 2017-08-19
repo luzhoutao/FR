@@ -72,15 +72,3 @@ np.save('pca/Wnorm', W_norm)
 np.save('pca/eigenvalue', v)
 np.save('pca/mean', mean)
 print('done!')
-
-print("Start LDA ...")
-
-start_time = time.time()
-[W, center, classes] = lda(image_mat, labels)
-print('Finish in %s seconds!'%(time.time() - start_time))
-
-print('saving...')
-np.save('lda/W', W)
-np.save('lda/center', center)
-np.save('lda/classes', classes)
-print('done!')
