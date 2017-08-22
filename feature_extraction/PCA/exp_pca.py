@@ -5,35 +5,24 @@ import time
 from PIL import Image
 import numpy as np
 # utils
-from PCA import pca
-from LDA import lda
+from .PCA import pca
 # detection and alignment
-import detection
+from detection import detection
 
 # settings
-data_root = "./data/old_download"
+data_root = "./data"
 detector = detection.Detector()
-pca_w_path = "./pca/Wnorm.npy"
-result_root = "./results/lda"
-
-# truncated image bug
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 '''
-This file is used to extract LDA feature of faces.
-Data source: http://vintage.winklerbros.net/facescrub.html
-First, apply the PCA reduction to the raw data; then use it as the input data of LDA
-
-faces: 258 people, 37813 faces
-training time: ______ seconds (on Ubuntu 14.04, Intel core i7 3.40GHz * 8)
+This file is used to extract PCA feature of faces.
+Data source: http://vis-www.cs.umass.edu/lfw/
+faces: 13145
+training time: 3887 seconds (on Ubuntu 14.04, Intel core i7 3.40GHz * 8)
 
 Input face size: 150 * 170
-90% eigenvector: ___
+90% eigenvector: 89
 '''
-
-pca_w = np.load(pca_w_path)
 
 count = 0
 image_mat = []
@@ -44,9 +33,6 @@ for file in os.listdir(data_root):
         continue
 
     for imagefile in os.listdir(os.path.join(data_root, file)):
-        if 'jpg' not in imagefile:
-            continue
-
         # read image
         image = Image.open(os.path.join(data_root, file, imagefile)).convert(mode='L')
 
@@ -62,9 +48,8 @@ for file in os.listdir(data_root):
         face = np.array(faces[0].convert(mode='L'))
 
         face_vector = np.reshape(face, -1) # reshape to a row-vector
-        reduced_face_vector = np.dot(face_vector, pca_w)
 
-        image_mat.append(reduced_face_vector)
+        image_mat.append(face_vector)
         labels.append(file)
 
 print('\nFind %d mis-detected faces!' % (count))
@@ -74,15 +59,15 @@ image_mat = np.array(image_mat, dtype=np.float32).T
 labels = np.array(labels)
 print("Collect %d faces!" % (len(labels)))
 
-
-print("Start LDA ...")
+# run pca and save PC
+print("Start PCA ...")
 
 start_time = time.time()
-[W, center, classes] = lda(image_mat, labels)
+[W_norm, v, mean] = pca(image_mat)
 print('Finish in %s seconds!'%(time.time() - start_time))
 
-print('saving...')
-np.save(os.path.join(result_root, 'W'), W)
-np.save(os.path.join(result_root, 'center'), center)
-np.save(os.path.join(result_root, 'classes'), classes)
+print("saving...")
+np.save('../results/pca/Wnorm', W_norm)
+np.save('../results/pca/eigenvalue', v)
+np.save('../results/pca/mean', mean)
 print('done!')
